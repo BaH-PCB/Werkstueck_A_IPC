@@ -76,15 +76,15 @@ Würde ich die gleichen Anforderungen ein weiteres Mal umsetzen wollen, wäre ic
 
 
 Quellen:
-1.	https://docs.python.org/3/library/multiprocessing.html
-2.	https://docs.python.org/3/library/multiprocessing.shared_memory.html#multiprocessing.shared_memory.SharedMemory
-3.	https://docs.python.org/3/library/multiprocessing.shared_memory.html#multiprocessing.managers.SharedMemoryManager
-4.	https://docs.python.org/3/library/multiprocessing.shared_memory.html#multiprocessing.managers.SharedMemoryManager.ShareableList
-5.	https://docs.python.org/3/library/multiprocessing.shared_memory.html#multiprocessing.shared_memory.SharedMemory.close
-6.	https://docs.python.org/3/library/multiprocessing.shared_memory.html#multiprocessing.shared_memory.SharedMemory.unlink
-7.	https://docs.python.org/2.7/library/multiprocessing.html?highlight=shared%20memory
-8.	https://docs.python.org/2.7/library/multiprocessing.html?highlight=shared%20memory#multiprocessing.Value
-9.	https://docs.python.org/2.7/library/multiprocessing.html?highlight=shared%20memory#multiprocessing.Array
+1. https://docs.python.org/3/library/multiprocessing.html
+2. https://docs.python.org/3/library/multiprocessing.shared_memory.html#multiprocessing.shared_memory.SharedMemory
+3. https://docs.python.org/3/library/multiprocessing.shared_memory.html#multiprocessing.managers.SharedMemoryManager
+4. https://docs.python.org/3/library/multiprocessing.shared_memory.html#multiprocessing.managers.SharedMemoryManager.ShareableList
+5. https://docs.python.org/3/library/multiprocessing.shared_memory.html#multiprocessing.shared_memory.SharedMemory.close
+6. https://docs.python.org/3/library/multiprocessing.shared_memory.html#multiprocessing.shared_memory.SharedMemory.unlink
+7. https://docs.python.org/2.7/library/multiprocessing.html?highlight=shared%20memory
+8. https://docs.python.org/2.7/library/multiprocessing.html?highlight=shared%20memory#multiprocessing.Value
+9. https://docs.python.org/2.7/library/multiprocessing.html?highlight=shared%20memory#multiprocessing.Array
 
 
 
