@@ -7,7 +7,7 @@ SS2022 Projektarbeit Interprozesskommunikation
 
 Arne Chris Müller (Sockets)
 Falko-Hennig Roderich Claus Köning (Message Queues)
-Franz Ferdinand Blaschke (Shared Memory)
+Franz Blaschke (Shared Memory)
 Jasdip Erhart (Pipes)
 
 
