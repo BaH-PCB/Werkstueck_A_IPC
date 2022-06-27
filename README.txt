@@ -20,6 +20,7 @@ Die Herausforderung bei der Implementierung von Interprozesskommunikation ist es
 
 
 
+
 Shared Memory
 
 Um Prozessen auf einem Rechner mit Multicore-Prozessor und Windows Betriebssystem eine Prozesskommunikation zu ermöglichen, gibt es einige Ansätze, die in den folgenden Abschnitten dargestellt werden. Diese Ansätze finden sich unter anderem in dem Python multiprocessing Modul¹, welches seit Python 2.6 eine Lösung für Mehrrechnerverarbeitung von Prozessen bietet⁷.
