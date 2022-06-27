@@ -91,42 +91,39 @@ Quellen:
 
 Message Queues
 
-Man sollte ein Programm mit vier Prozessen entwickeln, welches im ersten Prozess eine Zufallszahl generiert und diese an den zweiten und dritten Prozess weitergibt. Der zweite Prozess hat die zufallsgenerierte Zahl dann in einem Textfile gespeichert und der dritte Prozess hat die Summe und den Durchschnitt der zufalls generierten Zahlen berechnet und diese zwei Werte (Durchschnitt, Summe) wurden dann an den letzten Prozess weitergegeben, welcher diese dann in der Shell ausgegeben hat.
-Es gab vier Möglichkeiten die Aufgabe zu bearbeiten und zwar durch Pipes, Message Queues, Shared Memory mit Semaphoren und durch Sockets. Wir haben als Gruppe dann eine Glücksrad Simulation benutzt um die Lösungsmöglichkeiten zu verteilen, ich habe Message Queues bekommen. Des Weiteren konnten wir wählen, ob wir den Code in Python, Bash oder in C schreiben, wir haben uns für Python entschieden, da in der Aufgabe angemerkt wurde, dass das Programm einfacher ist in C oder Python zu schreiben, schlussendlich haben wir uns für Python entschieden, da die Sprache einfacher zu lernen ist als C. Dann stand ich noch vor der Frage, ob ich 
+Das in der Aufgabenstellung gefordert Programm soll vier Prozesse gleichzeitig ausführen können und diese Prozesse sollen auch noch mit einander kommunizieren können, Python bietet zum Beispiel durch das multiprocessing Modul Prozesskommunikation an. Eine Message Queue in Python kann man durch den Aufruf multiprocessing.Queue() erstellen.
+Eine Message Queue kann man sich am besten wie einen Restaurant Betrieb vorstellen, ein Kellner nimmt die Bestellungen auf und hängt sie an ein schwarzes Brett in der Küche, die Bestellungen am schwarzen Brett werden dann der Reihenfolgen entsprechend von den Köchen abgearbeitet. In dem Beispiel ist das schwarze Brett die Message Queue, die Bestellungen die von den Kellnern an das schwarze Brett gehängt werden entsprechen dem Befehl „queue.put()“ und die Köche, welche die Bestellungen dann vom schwarzen Brett entfernen und bearbeiten entsprechen dem Befehl „queue.get()“.
+ 
+Bevor ich verstanden habe wie Message Queues funktionieren hatte ich überlegt meinen Code anders zu strukturieren, da ich keine Idee hatte, wie ich die in conv() generierte Zufallszahl an log() und stat() weitergeben konnte und wollte daher conv() nicht als eigene Methode implentieren, sondern conv() als globale Variable in die Main Methode schreiben und so an log() und stat() weitergeben, aber offensichtlich ist die Variante mit Message Queues schöner und viel sinnvoller, wieso ich meinen Code so und nicht anders entwickelt habe, lässt sich eigentlich mit nur einem Satz beantworten – bei der Ausführung des Codes wurde keine Fehlermeldung ausgegeben.
 
+def conv()
+In diesem Prozess wird zunächst eine Endlos Schleife erstellt „while True:“, welche dafür sorgt, dass der nachfolgende Code endlos ausgeführt wird. In der Schleife wird dann zufällig eine Zahl zwischen 1 und 100 erstellt, welche dann durch queue.put() in die Message Queue weitergegeben wird, so das andere Prozesse auf die Zufallszahl zugreifen können, abschliessend wird dem Programm über den Befehl sleep() noch gesagt, dass er 0,8 Sekunden pausieren soll bis er den Code erneut ausführen soll.
 
-Also ich habe hauptsächlich auf die drei genannten Resourcen zugegriffen bei der Entwicklung meines Codes, wieso ich meinen Code so und nicht anders entwickelt habe, lässt sich eigentlich mit einem Satz beantworten – bei der Ausführung des Codes wurde keine Fehlermeldung ausgegeben. 
+def log()
+Hier wird ebenfalls zuerst eine Endlos Schleife erstellt (analog zu def conv()). In der Schleife wird zunächst die in der Message Queue befindliche Zufallszahl an eine Variable übergeben und in einen String umgewandelt. Nun wird eine Textdatei erstellt und geöffnet, fortlaufend werden die in conv() erstellten Zufallszahlen in diese Textdatei geschrieben und gespeichert. Nach jedem schreiben und speichern, pausiert das Programm 0,8 Sekunden bevor es den Vorgang erneut durchführt via sleep (analog zu conv()).
 
-Bevor ich verstanden habe, wie Message Queues funktionieren hatte ich überlegt meinen Code anders zu strukturieren, da ich keine Idee hatte, wie ich die in conv() generierte Zufallszahl an log() und stat() weitergebe und wollte daher conv() nicht als eigene Methode implentieren, sondern conv() als globale Variable in die Main Methode reinschreiben und an log() und stat() weitergeben, aber offensichtlich ist die Variante mit Message Queues schöner und viel sinnvoller. 
+def stat()
+In diesem Prozess wird zunächst ein Array erstellt und danach analog zu den beiden vorangehenden Prozessen eine Endlosschleife erzeugt. In dieser Schleife wird zunächst wieder die Zufallszahl in einer Variable gespeichert (analog zu log()) und diese Variable wird dann in dem anfangs erstellten Array gespeichert. Daraufhin wird die Summe und der Durchschnitt der Zufallszahlen berechnet. Die Summe und der Durchschnitt wird dann einer zweiten und dritten Message Queue hinzugefügt. Analog zu den zwei ersten Prozessen wird das Programm 0,8 Sekunden via sleep() pausiert, bevor es erneut ausgeführt wird.
 
-Message Queues kann man sich am besten wie einen Restaurant Betrieb vorstellen, ein Kellner nimmt die Bestellungen auf und hängt sie an ein schwarzes Brett in der Küche, die Bestellungen am schwarzen Brett werden dann der Reihenfolgen entsprechend von den Köchen abgearbeitet. In dem Beispiel ist das schwarze Brett die Message Queue, die Bestellungen die von den Kellnern an das schwarze Brett gehängt werden entsprechen dem Befehl „queue.put()“ und die Köche, welche die Bestellungen dann vom schwarzen Brett entfernen und bearbeiten entsprechen dem Befehl „queue.get()“.
+def report()
+Der letzte Prozess empfängt die Summe und den Durchschnitt, welche in stat() berechnet wurden und über die zweite und dritte Message Queue weitergeschickt wurden. Diesen beiden Werte werden jetzt in der Shell ausgegeben.
 
-Mein Programm beginnt mit dem Prozess def conv(), hier wird zunächst eine Endlos Schleife erstellt „while True:“, welche dafür sorgt, dass der nachfolgende Code endlos ausgeführt wird. In der Schleife wird dann zufällig eine Zahl zwischen 1 und 100 erstellt, welche dann durch queue.put() in die Message Queue weitergegeben wird, so das andere Prozesse auf die Zufallszahl zugreifen können, abschliessend wird dem Programm über den Befehl sleep() noch gesagt, dass er 0,8 Sekunden pausieren soll bis er den Code erneut ausführen soll.
-
-Darauffolgt der Prozess def log(), hier wird ebenfalls zuerst eine Endlos Schleife erstellt (analog zu def conv()). In der Schleife wird zunächst die in der Message Queue befindliche Zufallszahl an eine Variable übergeben und in einen String umgewandelt. Nun wird eine Textdatei erstellt und geöffnet, fortlaufend werden die in conv() erstellten Zufallszahlen in diese Textdatei geschrieben und gespeichert. Nach jedem schreiben und speichern, pausiert das Programm 0,8 Sekunden bevor es den Vorgang erneut durchführt via sleep (analog zu conv()).
-
-An dritter Stelle kommt der Prozess def stat(), in diesem wird zunächst ein Array erstellt und danach analog zu den beiden vorangehenden Prozessen eine Endlosschleife erzeugt. In dieser Schleife wird zunächst wieder die Zufallszahl in einer Variable gespeichert (analog zu log()) und diese Variable wird dann in dem anfangs erstellten Array gespeichert. Daraufhin wird die Summe und der Durchschnitt der Zufallszahlen berechnet. Die Summe und der Durchschnitt wird dann einer zweiten und dritten Message Queue hinzugefügt. Analog zu den zwei ersten Prozessen wird das Programm 0,8 Sekunden via sleep() pausiert, bevor es erneut ausgeführt wird.
-
-Der letzte Prozess def report() empfängt die Summe und Durchschnitt, welche in stat() berechnet wurden und über die zweite und dritte Message Queue weitergeschickt wurden. Diesen beiden Werte werden jetzt in der Shell ausgegeben.
-
+Main Methode
 In der Main Methode werden zuerst die drei Message Queues erstellt, anschließend werden die vier Funktionen conv(), log(), stat() und report() offiziell als Prozesse deklariert.
 
 Zuletzt werden die Prozesse via „.start()“ gestartet und danach wird durch „.join()“ die Synchronisation sicher gestellt, da erst conv() durchlaufen muss, bevor log() und stat() die Zufallszahl auslesen können, report() startet erst, wenn stat() die Summe und den Durchschnitt berechnet hat.
-Der wichtigste Teil meiner Eigenleistung ist die Kommunikation zwischen den Prozessen, die einzelnen Funktionen conv(), log(), stat() und report() kriegt man mit zehn Minuten googlen und ein wenig Stackoverflow hin, aber die Prozesse miteinander kommunizieren zu lassen und die Variablen zwischen verschiedenen Prozessen zu übergeben ist schwieriger als es aussieht, im Nachhinein ist natürlich alles einfach.
 
-Abschließend kann ich behaupten die Aufgabenstellung sinngemäß erfüllt zu haben und die Herausforderung der Interprozesskommunikation und der Endlossprozesse gelöst zu haben. Das einzige was ich nicht geschafft habe ist die Implementierung von SIGINT. Zusammengefasst im grossen und ganzen habe ich einen funktionierendes Programm mit einem Makel geschrieben.
+Der wichtigste Teil meiner Eigenleistung ist die Kommunikation zwischen den Prozessen, die einzelnen Funktionen conv(), log(), stat() und report() kriegt man mit zehn Minuten googlen und ein wenig Stackoverflow hin, aber die Prozesse miteinander kommunizieren zu lassen und die Variablen zwischen den verschiedenen Prozessen zu übergeben ist schwieriger als es aussieht, im Nachhinein ist natürlich einfach.
 
+Abschließend kann ich behaupten die Aufgabenstellung sinngemäß erfüllt zu haben und die Herausforderung der Interprozesskommunikation und der Endlossprozesse gelöst zu haben. Das einzige was ich nicht geschafft habe ist die Implementierung von SIGINT. Zusammengefasst im Großen und Ganzen habe ich einen funktionierendes Programm mit nur einem Makel geschrieben zu haben. Zudem bin ich glücklich darüber den Einstieg in Python gefunden zu haben.
 
-Bei der Entwicklung meiner Lösung habe ich vorwiegend auf folgende Ressourcen zugegriffen:
+Bei der Entwicklung meiner Lösung habe ich vorwiegend auf folgende Ressourcen zugegriffen, Quellen:
 
-Python Docs1 (https://docs.python.org/3/)
-Hier findet man zu jedem Befehl in Python eine Erklärung und überwiegend auch Beispiele dazu.
-	
-YouTube2 (https://www.youtube.com/)
-Auf YouTube gab es überraschend wenig Informationen zu Multiprocessing und Message Queues, aber dafür genug Videos zu den Standardfunktionen wie randint oder wie man etwas in einem Textdokument speichern kann.
-		
-Python Discord Server3 (https://discord.com/invite/python)
-Der Python Discord Server ist ein wenig wie Stackoverflow, nur eben Python Spezifisch, man kann fragen stellen oder auch um Hilfe fragen, falls der Code nicht richtig ausgeführt wird. Dort wurde mir unteranderem gesagt das ich den Append Mode ‘a‘ und nicht den Write Mode ‘w‘ benutzen soll, wenn ich Variablen fortlaufend in ein Textdokument schreiben möchte.
+Python Doc (https://docs.python.org/3/)
+Hier findet man zu jedem Befehl in Python eine Erklärung und überwiegend auch Beispiele dazu. 
+
+Python Discord Server (https://discord.com/invite/python)
+Der Python Discord Server ist ein wenig wie Stackoverflow, nur eben Python Spezifisch. Dort wurde mir unteranderem gesagt das ich den Append Mode ‘a‘ und nicht den Write Mode ‘w‘ benutzen sollte, wenn ich Variablen fortlaufend in ein Textdokument schreiben möchte.
 
 
 
@@ -147,6 +144,7 @@ Definition der einzelnen Prozesse
 def conv()
 Hier wird der Prozess conv() erstellt welche durch den Befehl setproctitle den Titel conv() erhält. Anschließend wird eine Schleife erstellt, welche Zufallszahlen generiert. Durch sys.stdout.write wird eine Eingabe Aufforderung erzeugt, welche durch write in eine Datei geschrieben wird. Durch sleep wird die Zeit angegeben, welche das Programm warten soll, bis die nächste Zahl generiert wird.
 
+ 
 def log()
 Hier wird der Prozess log() erstellt. Durch „setproctitle“ wird der name des Prozesses auf log() gesetzt. Anschließend wird mit open() die Datei aufgerufen und in den Modus w gesetzt die in eine String-Variable „f“ schreibt. Mit der Funktion f.truncate wird sichergestellt, dass die Variable leer ist bevor die Schleife aufgerufen wird. Daraufhin wird die variable 
 output = str(sys.stdin.readline()) erstellt u d wartet darauf, dass Werte von außen (später durch die Pipe) übertragen werden. Mit log.write(output) wird der String beschrieben.
@@ -158,12 +156,52 @@ def report()
 Der Prozesstitel wird hier mit Hilfe von setproctitle auf report() gesetzt. Anschließend wird eine Schleife erstellt, welche Werte über output = str(sys.stdin.readline()) von Output einliest. Ausgegeben werden die Werte durch sys.stdout.write(output). Die
 if __name__ == "__main__"-Abfrage prüft, ob das Programm als Hauptprogramm gestartet wurde, falls ja wird nachstehender Codeblock ausgeführt. Anschließend wird geprüft, ob in sys.argv[] Argumente enthalten sind. Daraufhin werden die Argumente benannt und die einzelnen Prozesse übergeben und ausgeführt. Als nächstes werden die Pipes mit popen geöffnet und angelegt. Durch stdin und stdout wird festgelegt, welcher Prozess senden und welcher Empfangen soll. Im Fall von stat_process sogar beides. Der Befehl -u bedeutet, dass der Prozess direkt ausgeben soll was er bekommt. Es soll also nicht im bufer zwischengespeichert werden. Im Beispiel von conv_process wird stdout=Pipe im nachfolgenden Codeblock in der while-true-Schleife definiert. Bufsize heißt, dass zum Beispiel log() nicht eine gewisse Größe abwarten soll, sondern direkt Werte weiter ausgibt. Im letzte Codeblock wird sichergestellt, dass alle Prozesse auch beendet werden. Durch     ctrl C im Terminal wird nur der Hauptprozess geschlossen, mithilfe der signal.SIGINT Anweisung werden alle anderen Prozesse beendet.
 
-Pipes Fazit
+Fazit
 Für den Aufbau von Programmen mit wenigen Endpunkten eignet sich die Pipe sehr gut, da eine Pipe im Gegensatz zu einer Queue nur zwei Endpunkte hat. In dieser Implementierung war es nur notwendig zwei Prozesse gleichzeitig miteinander kommunizieren zu lassen. Da wir so nur zwei Endpunkte hatten, war das Prinzip einer Pipe hier perfekt für die Implementierung. Der Vorteil der Pipe im Gegensatz zu einer Queue in diesem Programm ist zum Beispiel die schnellere Performance, da weniger Endpunkte vorhanden sind.
 
 
 
 
+Sockets
 
+Was sind Sockets?
+Bei Sockets handelt es sich um die Kommunikationsendpunkte einer bidirektionalen Netzwerkverbindung. Es entsteht also ein Datenaustausch zwischen gleichberechtigten Kommunikationspartnern, die ihre Verbindung über das Internet, ein lokales Netzwerk oder auch auf dem gleichen Endgerät zueinander aufbauen können. 
+Bei den Kommunikationspartnern handelt es sich in der realen Welt klassischerweise um eine sogenannte Client-Server-Architektur. Hierbei läuft beispielsweise ein bestimmter Dienst bzw. ein Programm auf einem Computer der den Server darstellt, welcher eine Verbindung von einem anderem Computer der den Client darstellt erwartet. Server und Client können sich jedoch wie bereits erwähnt, auch auf dem gleichen Endgerät befinden. Fragt nun ein Client bei besagtem Server an, eine Verbindung zu ihm aufzubauen, so kann die dabei entstehende Netzwerkkommunikation in zwei Typen unterschiedlicher Protokollnutzung unterteilt werden. 
+Zum einen in Datagram Sockets, welche UDP (User Datagram Protocol) nutzen und Nachrichtenorientert arbeiten, und zum andern in Stream Sockets, welche TCP (Transmission Control Protocol) nutzen und Verbindungsorientiert arbeiten. Letzteres ist der Standard, der auch in diesem Projekt verwendet wird. Der unterschied zwischen beiden Protokollen besteht darin, dass UDP eine Kommunikation über einzelne Nachrichten, dessen Reihenfolge und Zustellung nicht garantiert wird realisiert, und TCP diese Reihenfolge und Zustellung gewährleistet, was TCP zwar verlässlicher aber im vergleich zu UDP auch unflexibler macht. 
+Beiden Protokollen liegt in diesem Projekt IP (Internet Protocol) zugrunde, welches die Grundlage der bereits beschriebenen Netzwerkkommunikation bietet. Beide Kommunikations-partner sind durch eine IP-Adresse identifizier- und erreichbar. Zusätzlich wird für den erfolgreichen Aufbau einer Verbindung ein entsprechender Port benötigt, der auf beiden Kommunikationspartner für die jeweilige Verbidung identisch sein sollte.
+
+Projektaufbau mit Sockets
+Die Interprozesskommunikation für Sockets wurde in diesem Projekt auf dem Betriebssystem Windows mit der Programmiersprache Python auf einem einzigen Computer realisiert. Prinzipiell wäre es jedoch möglich mit angepasster IP-Adresse, eine tatsächliche Client-Server-Architektur sowohl über ein größeres Netzwerk, als auch mit mehreren Clients zu realisieren. Für den erfolgreichen Aufbau einer Verbindung zwischen dem Server- und Clientprogramm auf dem gleichen Computer wurde die sogenannten Loopback-Adresse als IP-Adresse mit der Kennung 127.0.0.1 verwendet, die speziell für Zwecke dieser Art gedacht ist. Als Port-Kennung wurde die Nummer 51337 verwendet, da diese über 50000 und somit auserhalb der reservierten Portbereiche liegt, um keine Konflikte bei der Netzwerk-kommunikation zu erzeugen.
+Prinzipiell erfolgt die Kommunikation zwischen den Prozessen Conv, Log, Stat und Report wie folgt. Zunächst wird das Serverprogramm „socket_server.py“ gestartet. Sobald der Server gestartet wurde, kann das Clientprogramm  „socket_client.py“ gestartet werden. Nun sendet der Client, über den Conv-Prozess stetig Zufallszahlen an den Server. Auf dem Server schreibt der Log-Prozess diese Zahlen in eine Datei, während der Stat-Prozess stetig Summe und Durchschnitt neu berechnet. Die errechneten Zahlenwerte werden an den Client gesendet, welcher diese über den Report-Prozess ausgibt.
+Gewählter Lösungsweg
+Es erschien am sinnvollsten den Aufbau so zu gestalten, dass der Server so gesehen Rechenleistung zur Verfügung stellt, die ein Client in Anspruch nimmt. In diesem Zusammenhang dokumentiert der Server die erhaltenen Zahlenwerte und sendet das Endergebnis an den Client, der dieses nurnoch ausgeben muss. Überträgt man diesen Projektaufbau auf die reale Welt, so kann dies als plausibler Aufbau für Cloud Computing gesehen werden. Der Client sendet stetig Conv-Zahlenwerte und gibt Report-Ergebnisse aus, während parallel dazu, der Server diese Conv-Werte über Log speichert und daraus über Stat die Summe und den Durchschnitt berechnet. Es findet also ein indirektes Multiprocessing statt, obwohl dieses in Kombination mit Sockets unter Windows und Python normalerweise keine Anwendung findet. Sinnvollerweise wurde hier eine TCP-Verbindung über IP gewählt, da die richtige Reihenfolge, sowie die Gewährleistung der Richtigkeit der übertragenen Daten, zwingend notwendig ist um eine korrekte Funktionsweise zu implementieren. Das Kommentieren des Programmcodes ist in Englisch erfolgt, da dies den Open Source Ansatz von GitHub unterstützt.
+
+Main Methode
+Zunächst wird auf dem Server ein Socket mit den Parametern „AF_INET“ für IP und „STREAM“ für TCP geöffnet, der nun darauf wartet bis der Client Socket eine Verbindung anfordert. Parallel dazu wird auf dem Client ein Socket mit den gleichen Parametern geöffnet, der eine Verbindung zum Server Socket anfordert. Wurde die Verbindung über die Loopback-Adresse aufgebaut, so erscheint eine entsprechende Benachrichtigung in der Ausgabe. Anschließend wird auf dem Server die Datei für den Log-Prozess und die Stat-Summe initialisiert. Nun beginnt auf Server und Client die Dauerschleife welche jeweils den Sende- und Empfangsprozess über Sockets von Conv, Stat und Report sowie SIGINT beinhaltet. Des Weiteren wird auf dem Server der Log-Prozess gestartet und ein Counter für die Durchschnittsberechnung mit Stat implementiert. Drückt man Ctrl+C, so wird SIGINT aktiv, alle Dateien und Verbindungen geschlossen und das Programm gestoppt.
+
+Conv Prozess
+Der Client erzeugt nun jede Sekunde Zufallszahlen zwischen 0 und 100 und schickt diese direkt an den Server. Wie sich unter den genannten Bedingungen herausstellte, müssen die Daten zum versenden in einen String umgewandelt und anschließend mit UTF-8 codiert werden, da ein erfolgreiches empfangen und decodieren auf Server Seite ansonsten nicht möglich war. Entsprechend wandelt der Server die vom Conv-Prozess empfangenen Zahlen zum weiteren berechnen wieder in einen Integer um und übergibt diese an die Main und somit an den Log-Prozess. Es erfolgt eine entsprechende Ausgabe auf Server und Client.
+
+Log Prozess
+Der Server öffnet nun die zuvor initialisierte und angelegte Log Datei, um jede empfangene Zahl von Conv stetig als String in der Datei untereinander anzuhängen und zu speichern. Anschließend wird die Log Datei wieder geschlossen und es erfolgt eine entsprechende Ausgabe.
+
+
+Stat Prozess
+Die von Conv empfangene Zahl, sowie der Schleifenzähler werden nun an den Stat-Prozess übergeben. Anschließend wird die zuvor initialisierte und angelegte Stat Datei geöffnet, um die zwischengespeicherte Summe zu lesen. Beim ersten Durchlauf ist die Datei jedoch noch leer. Dann wird die aktuelle Summe mit der zuletzt empfangenen Zahl aus Conv addiert, um die neue Summe zu bilden. Die neue Summe wird wieder in die Stat Datei geschrieben und überschreibt den alten Summenwert, somit geht beim nächsten Durchlauf die aktuelle Summe für ein erneutes Aufaddieren nicht verloren. Diese Methode war für Prozessübergreifendes verarbeiten der Zahlenwerte zwischen Conv, Stat und Report die einfachere Lösung als die Verwendung eines Arrays. Anschließend erfolgt eine entsprechende Ausgabe und die Übergabe der Werte an die Main und somit an den Report-Prozess.
+
+Report Prozess
+Die vom Stat-Prozess berechneten Summen und Druchschnitte für jede Zahl aus Conv werden an den Report-Prozess übergeben und in einen String umgewandelt. Wie auch schon im Conv-Prozess beschrieben, ist die Umwandlung erneut notwendig, um den Datensatz mit UTF-8 zu codieren und diesen anschließend über die Socketverbindung vom Server zum Client zu senden. Der Client empfängt über seinen Report-Prozess nun den Datensatz und decodiert ihn wieder mit UTF-8. Ein umwandeln von String in Integer ist diesmal nicht notwendig, da Report die von Stat empfangenen Daten direkt auf der Client Shell ausgibt.
+
+Fazit
+Die größte Herausforderung am Projekt stellte die sehr geringe bis nicht vorhandene Verfügbarkeit von Code-Beispielen und Sachtexten im Internet dar, die die Kombination aus Windows, Python, Sockets und Multiprocessing mit sich brachte. Dies führte zu einem zeitlich sehr hohen Arbeitsaufwand und dem Entwickeln eigener Lösungsansätze. So wurde beispielsweise über Umwege herausgefunden, dass „fork“ unter Linux aber nicht unter Windows verfügbar ist, oder dass es kein klassisches Multiprocssing in Kombination mit Sockets über Python unter Windows gibt. Insgesamt kann man jedoch sagen, dass die Aufgabenstellung trotz zeitintensivem Weg erfolgreich bewältigt wurde. Es laufen mehrere Prozesse auf der Serverseite parallel zu mehreren Prozessen auf der Clientseite, während die Kommunikation der unterschiedlichen Prozesse untereinander über Sockets realisiert wurde. Für einen reibungsloseren Ablauf in zukünftigen Projekten ist es nun motivierend, vermehrt mit Linux zu arbeiten um in weiteren bereichen der Informatik besser arbeiten zu können.
+
+
+Quellen
+http://www.christianbaun.de/BSRN22/Skript/bsrn_SS2022_vorlesung_06_de.pdf
+https://stackoverflow.com/questions/8545307/multiprocessing-and-sockets-in-python
+https://docs.python.org/3/library/multiprocessing.html
+https://de.wikipedia.org/wiki/Socket_(Software)
+https://www.youtube.com/watch?v=YwWfKitB8aA
+https://www.youtube.com/watch?v=Lbfe3-v7yE0
 
 
